@@ -16,7 +16,7 @@ pub struct OptionPricing {
 
 pub fn read_csv(file_path: &str) -> Result<Vec<f64>, Box<dyn Error>> {
     let mut reader = csv::ReaderBuilder::new()
-        .has_headers(true)
+        .has_headers(true) // Skip first line
         .from_path(file_path)?;
     
     let mut ending_values = Vec::new();
@@ -28,7 +28,6 @@ pub fn read_csv(file_path: &str) -> Result<Vec<f64>, Box<dyn Error>> {
     
     Ok(ending_values)
 }
-
 
 pub fn mtcl_simulator(ending_values: &str, op: OptionPricing, num_sim: i32, num_threads: i32) -> Result<f64, Box<dyn Error>> {
     let ending_values = read_csv(ending_values)?;
@@ -53,6 +52,9 @@ pub fn mtcl_simulator(ending_values: &str, op: OptionPricing, num_sim: i32, num_
                 let payoff_sim = (price - strike_price).max(0.0);
                 payoff += payoff_sim;
             }
+
+            println!("payoff {:?}", &payoff);
+
             payoff
         })
         .sum();
@@ -68,10 +70,11 @@ pub fn timed<R, F>(f: F) -> (R, Duration) where F: Fn() -> R {
     (res, starting_point.elapsed())
 }
 
-fn main() {
+pub fn run_sim_default(ending_values: &str)
+{
+    // For datasets with ~30,000,000 values
     let n_sim = 30_000_000usize;
     let n_thr = 1000;
-    let ending_values = "C:\\Users\\User\\RustProjects\\funpar-t2-22-project-montecarlo-main\\test_cases\\test1.csv";
 
     let (res, t) = timed(|| 
         mtcl_simulator(ending_values, 
@@ -79,4 +82,28 @@ fn main() {
             n_sim as i32, n_thr));
             
     println!("mtcl_sim: res = {:?}, t={}s", res, t.as_secs_f64());
+}
+
+pub fn run_sim_fine_tuned(ending_values: &str, n_sim: usize)
+{
+    let n_thr = 1000;
+
+    let (res, t) = timed(|| 
+        mtcl_simulator(ending_values, 
+            OptionPricing { strike_price: 100.0, risk_free_rate: 0.025, time_to_maturity: 1.0, volatility: 0.2 }, 
+            n_sim as i32, n_thr));
+            
+    println!("mtcl_sim: res = {:?}, t={}s", res, t.as_secs_f64());
+}
+
+fn main() {
+    // let testing_2 = "/Users/TX3014/Downloads/funpar-t2-22-project-montecarlo/test_cases/test2.csv";
+    //let testing_3 = "/Users/TX3014/Downloads/funpar-t2-22-project-montecarlo/test_cases/test3.csv";
+    // let testing_4 = "/Users/TX3014/Downloads/funpar-t2-22-project-montecarlo/test_cases/test4.csv";
+    let testing_5 = "/Users/TX3014/Downloads/funpar-t2-22-project-montecarlo/test_cases/test5.csv";
+
+    // run_sim_fine_tuned(&testing_2, 1000);
+    // run_sim_fine_tuned(&testing_3, 1_000);
+    // run_sim_fine_tuned(&testing_4, 900_000);
+    run_sim_fine_tuned(&testing_5, 1_000);
 }
