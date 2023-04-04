@@ -52,14 +52,14 @@ pub fn mtcl_simulator(ending_values: &str, op: OptionPricing, num_sim: i32, num_
                 let payoff_sim = (price - strike_price).max(0.0);
                 payoff += payoff_sim;
             }
-
-            println!("payoff {:?}", &payoff);
-
+            println!("payoff =  {:?}", &payoff);
             payoff
         })
         .sum();
 
     let option_price = (total_payoff / num_sim as f64) * (1.0 / (1.0 + risk_free_rate* time_to_maturity));
+
+    println!("\nTotal payoff =  {:?} | Option price = {:?}", &total_payoff, &option_price);
 
     Ok(option_price)
 }
@@ -86,7 +86,7 @@ pub fn run_sim_default(ending_values: &str)
 
 pub fn run_sim_fine_tuned(ending_values: &str, n_sim: usize)
 {
-    let n_thr = 1000;
+    let n_thr: i32 = 1000;
 
     let (res, t) = timed(|| 
         mtcl_simulator(ending_values, 
@@ -98,7 +98,7 @@ pub fn run_sim_fine_tuned(ending_values: &str, n_sim: usize)
 
 fn main() {
     // let testing_2 = "/Users/TX3014/Downloads/funpar-t2-22-project-montecarlo/test_cases/test2.csv";
-    //let testing_3 = "/Users/TX3014/Downloads/funpar-t2-22-project-montecarlo/test_cases/test3.csv";
+    // let testing_3 = "/Users/TX3014/Downloads/funpar-t2-22-project-montecarlo/test_cases/test3.csv";
     // let testing_4 = "/Users/TX3014/Downloads/funpar-t2-22-project-montecarlo/test_cases/test4.csv";
     let testing_5 = "/Users/TX3014/Downloads/funpar-t2-22-project-montecarlo/test_cases/test5.csv";
 
